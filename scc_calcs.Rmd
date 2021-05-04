@@ -1,0 +1,33 @@
+---
+title: "Social Cost of Carbon"
+author: "Bri Baker"
+date: "5/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+
+```{r}
+gas <- read_csv(here("HW3_data.csv")) %>% 
+  clean_names()
+
+gas_price <- 3 #$/gal
+carbon_cost <- 51 # $/metric ton
+
+```
+
+Consumers can be separated into two income groups: "high" and "low." The data set provides
+price (in $) and quantity (in gallons) estimates of demand per day for the two groups. Run
+linear regressions (with an intercept) to estimate the demand curves for "high" and "low"
+income consumers.
+-Initially, there is no tax on gasoline.
+-The current gas price (without any taxes) is $3.00 per gallon.
+-The marginal cost of producing a gallon of gasoline is linear and has a price-intercept of 0.
+For the purposes of this exercise, you can assume that the US is self-contained in supply and
+demand (you don't need to worry about global markets).
