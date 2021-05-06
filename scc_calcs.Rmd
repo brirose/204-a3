@@ -24,12 +24,11 @@ gas <- read_csv(here("HW3_data.csv")) %>%
   mutate(q_agg_gal = q_low_gallons + q_high_gallons)
 
 gas_price <- 3 # $/gal
-scc_ton <- 51 # $/metric ton
+scc <- 51 # $/metric ton
 ton <- 2000 # lb
 
-scc_lb <- scc_ton/ton
-
 ```
+
 
 ## Question 1
 ```{r}
@@ -65,9 +64,13 @@ inverse_demand <- function(p, model){
 Aggregate demand: p = `r round(d_agg_slope, 2)`q + `r round(d_agg_intercept)`
 
 ```{r supply curve}
-s_slope <- (3)/(demand(3, d_agg))
+s_slope <- (3/inverse_demand(3,d_agg))
 
 s_intercept <- 0
+```
+
+```{r}
+random_x <- data_frame("random" = 0:900000)
 ```
 
 ```{r}
@@ -79,7 +82,9 @@ d_ag <- lm(price_dollars ~ q_agg_gal, data = gas) #create linear model
 d_ag_slope <- d_ag$coefficients[[2]] #finds the slope
 d_ag_intercept <- d_ag$coefficients[[1]] #finds the intercept
 
-price_fitted <- d_ag_intercept + d_ag_slope*gas$q_agg_gal #creates estimated line
+price_fitted_demand <- d_ag_intercept + d_ag_slope*gas$q_agg_gal #creates estimated line for demand
+
+price_fitted_supply <- s_intercept + s_slope*gas$q_agg_gal #creates estimated line for supply
 
 aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
   geom_point() +
@@ -87,13 +92,16 @@ aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
   labs(x = "Quantity of gas demanded (gal)",
        y = "Price ($/gal)",
        title = "Aggregate demand for gasoline using linear regression") +
-  geom_line(aes(y=price_fitted, x=q_agg_gal)) #plotted the fitted relationship on the graph
+  geom_line(aes(y=price_fitted_demand, x=random_x$random)) +
+  geom_line(aes(y=price_fitted_supply, x=random_x$random)) #plotted the fitted relationship on the graph
+
+aggregate_demand
 
 ```
 
 Aggregate supply: p = `r round(s_slope, 2)`q + `r round(s_intercept)`
 
-```{r surplus initial}
+```{r surplus}
 
 surplus_p <- function(p, model){
   q <- inverse_demand(p, model)
@@ -111,12 +119,5 @@ cs_initial <- surplus_p(3, d_agg)
 
 ps_initial <- 0.5*(3*inverse_demand(3, d_agg))
 
-```
-
-Consumer "benefit": $`r round(cs_initial, 2)`
-Producer "benefit": $`r round (ps_initial, 2)`
-
-```{r env cost initial}
-env_cost_initial <- inverse_demand(3, d_agg)*scc_lb
 ```
 
