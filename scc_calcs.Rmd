@@ -24,8 +24,10 @@ gas <- read_csv(here("HW3_data.csv")) %>%
   mutate(q_agg_gal = q_low_gallons + q_high_gallons)
 
 gas_price <- 3 # $/gal
-scc <- 51 # $/metric ton
+scc_ton <- 51 # $/metric ton
 ton <- 2000 # lb
+
+scc_lb <- scc_ton/ton
 
 ```
 
@@ -63,7 +65,7 @@ inverse_demand <- function(p, model){
 Aggregate demand: p = `r round(d_agg_slope, 2)`q + `r round(d_agg_intercept)`
 
 ```{r supply curve}
-s_slope <- (0-inverse_demand(3, d_agg))/(0-3)
+s_slope <- (3)/(demand(3, d_agg))
 
 s_intercept <- 0
 ```
@@ -91,7 +93,7 @@ aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
 
 Aggregate supply: p = `r round(s_slope, 2)`q + `r round(s_intercept)`
 
-```{r surplus}
+```{r surplus initial}
 
 surplus_p <- function(p, model){
   q <- inverse_demand(p, model)
@@ -111,4 +113,10 @@ ps_initial <- 0.5*(3*inverse_demand(3, d_agg))
 
 ```
 
+Consumer "benefit": $`r round(cs_initial, 2)`
+Producer "benefit": $`r round (ps_initial, 2)`
+
+```{r env cost initial}
+env_cost_initial <- inverse_demand(3, d_agg)*scc_lb
+```
 
