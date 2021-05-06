@@ -1,8 +1,11 @@
 ---
-title: "Social Cost of Carbon"
+title: "ESM 204 HW 3: Distributional consequences of climate policy"
 author: "Bri Baker and Anna Talken"
-date: "5/4/2021"
-output: html_document
+date: "Spring 2021"
+output:
+  html_document:
+    theme: cosmo
+    highlight: kate
 ---
 
 ```{r setup, include=FALSE}
@@ -14,20 +17,21 @@ library(here)
 library(janitor)
 ```
 
-
+## Data Setup
 ```{r}
 gas <- read_csv(here("HW3_data.csv")) %>% 
-  clean_names()
+  clean_names() %>% 
+  mutate(q_agg_gal = q_low_gallons + q_high_gallons)
 
-gas_price <- 3 #$/gal
+gas_price <- 3 # $/gal
 scc <- 51 # $/metric ton
-ton <- 2000
+ton <- 2000 # lb
 
 ```
 
 ## Question 1
 ```{r}
-emission_gal <- 19.6
+emission_gal <- 19.6 # tons of co2 in a gallon of gas
 
 mec <- emission_gal*(1/ton)*scc
 
@@ -35,4 +39,16 @@ mec <- emission_gal*(1/ton)*scc
 
 The marginal external cost is $`r round(mec, 3)`/gal.
 
+
 ## Question 2
+```{r}
+d_ag <- lm(price_dollars ~ q_agg_gal, data = gas)
+
+d_ag_slope <- d_ag$coefficients[[2]]
+d_ag_intercept <- d_ag$coefficients[[1]]
+
+
+
+
+```
+
