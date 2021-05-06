@@ -41,14 +41,55 @@ The marginal external cost is $`r round(mec, 3)`/gal.
 
 
 ## Question 2
-```{r}
-d_ag <- lm(price_dollars ~ q_agg_gal, data = gas)
+```{r demand curve}
+d_agg <- lm(price_dollars ~ q_agg_gal, data = gas)
 
-d_ag_slope <- d_ag$coefficients[[2]]
-d_ag_intercept <- d_ag$coefficients[[1]]
+d_agg_slope <- d_agg$coefficients[[2]]
+d_agg_intercept <- d_agg$coefficients[[1]]
 
+demand <- function(q, model){
+  p <- model$coefficients[[1]] + model$coefficients[[2]]*q
+return(p)
+}
 
+inverse_demand <- function(p, model){
+  q <- (p - model$coefficients[[1]])/model$coefficients[[2]]
+  return(q)
+}
+
+```
+
+Aggregate demand: p = `r round(d_agg_slope, 2)`q + `r round(d_agg_intercept)`
+
+```{r supply curve}
+
+s_slope <- (0-inverse_demand(3, d_agg))/(0-3)
+
+s_intercept <- 0
 
 
 ```
+
+Aggregate supply: p = `r round(s_slope, 2)`q + `r round(s_intercept)`
+
+```{r surplus}
+
+surplus_p <- function(p, model){
+  q <- inverse_demand(p, model)
+  cs <- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}
+
+surplus_q <- function(q, model){
+  p <- demand(q, model)
+  cs <- 0.5*(model$coefficients[[1]] - p)*q
+  return(cs)
+}
+
+cs_initial <- surplus_p(3, d_agg)
+
+ps_initial <- 0.5*(3*inverse_demand(3, d_agg))
+
+```
+
 
