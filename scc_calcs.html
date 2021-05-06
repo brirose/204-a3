@@ -280,21 +280,81 @@ summary {
 </div>
 
 
+<div id="data-setup" class="section level2">
+<h2>Data Setup</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>gas <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">&quot;HW3_data.csv&quot;</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>()</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>gas_price <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="co">#$/gal</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>scc <span class="ot">&lt;-</span> <span class="dv">51</span> <span class="co"># $/metric ton</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>ton <span class="ot">&lt;-</span> <span class="dv">2000</span></span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">q_agg_gal =</span> q_low_gallons <span class="sc">+</span> q_high_gallons)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>gas_price <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="co"># $/gal</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>scc_ton <span class="ot">&lt;-</span> <span class="dv">51</span> <span class="co"># $/metric ton</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>ton <span class="ot">&lt;-</span> <span class="dv">2000</span> <span class="co"># lb</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>scc_lb <span class="ot">&lt;-</span> scc_ton<span class="sc">/</span>ton</span></code></pre></div>
+</div>
 <div id="question-1" class="section level2">
 <h2>Question 1</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>emission_gal <span class="ot">&lt;-</span> <span class="fl">19.6</span></span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>emission_gal <span class="ot">&lt;-</span> <span class="fl">19.6</span> <span class="co"># pounds of co2 in a gallon of gas</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mec <span class="ot">&lt;-</span> emission_gal<span class="sc">*</span>(<span class="dv">1</span><span class="sc">/</span>ton)<span class="sc">*</span>scc</span></code></pre></div>
-<p>The marginal external cost is $0.5/gal.</p>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mec <span class="ot">&lt;-</span> emission_gal<span class="sc">*</span>scc_lb</span></code></pre></div>
+<p>The marginal external cost is $0.4998/gal.</p>
 </div>
 <div id="question-2" class="section level2">
 <h2>Question 2</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>d_agg <span class="ot">&lt;-</span> <span class="fu">lm</span>(price_dollars <span class="sc">~</span> q_agg_gal, <span class="at">data =</span> gas) <span class="co">#create linear model</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>d_agg_slope <span class="ot">&lt;-</span> d_agg<span class="sc">$</span>coefficients[[<span class="dv">2</span>]] <span class="co">#finds the slope</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>d_agg_intercept <span class="ot">&lt;-</span> d_agg<span class="sc">$</span>coefficients[[<span class="dv">1</span>]] <span class="co">#finds the intercept</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>demand <span class="ot">&lt;-</span> <span class="cf">function</span>(q, model){</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> model<span class="sc">$</span>coefficients[[<span class="dv">1</span>]] <span class="sc">+</span> model<span class="sc">$</span>coefficients[[<span class="dv">2</span>]]<span class="sc">*</span>q</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(p)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>inverse_demand <span class="ot">&lt;-</span> <span class="cf">function</span>(p, model){</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> (p <span class="sc">-</span> model<span class="sc">$</span>coefficients[[<span class="dv">1</span>]])<span class="sc">/</span>model<span class="sc">$</span>coefficients[[<span class="dv">2</span>]]</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(q)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Aggregate demand: p = -2.0429778^{-5}q + 15.0021358</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>s_slope <span class="ot">&lt;-</span> (<span class="dv">3</span>)<span class="sc">/</span>(<span class="fu">demand</span>(<span class="dv">3</span>, d_agg))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>s_intercept <span class="ot">&lt;-</span> <span class="dv">0</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting demand and supply curves</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#DEMAND CURVE</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>d_ag <span class="ot">&lt;-</span> <span class="fu">lm</span>(price_dollars <span class="sc">~</span> q_agg_gal, <span class="at">data =</span> gas) <span class="co">#create linear model</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>d_ag_slope <span class="ot">&lt;-</span> d_ag<span class="sc">$</span>coefficients[[<span class="dv">2</span>]] <span class="co">#finds the slope</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>d_ag_intercept <span class="ot">&lt;-</span> d_ag<span class="sc">$</span>coefficients[[<span class="dv">1</span>]] <span class="co">#finds the intercept</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>price_fitted <span class="ot">&lt;-</span> d_ag_intercept <span class="sc">+</span> d_ag_slope<span class="sc">*</span>gas<span class="sc">$</span>q_agg_gal <span class="co">#creates estimated line</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>aggregate_demand <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data=</span>gas, <span class="fu">aes</span>(<span class="at">x=</span>q_agg_gal,<span class="at">y=</span>price_dollars))<span class="sc">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Quantity of gas demanded (gal)&quot;</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Price ($/gal)&quot;</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Aggregate demand for gasoline using linear regression&quot;</span>) <span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y=</span>price_fitted, <span class="at">x=</span>q_agg_gal)) <span class="co">#plotted the fitted relationship on the graph</span></span></code></pre></div>
+<p>Aggregate supply: p = 0.1999723q</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>surplus_p <span class="ot">&lt;-</span> <span class="cf">function</span>(p, model){</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">inverse_demand</span>(p, model)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  cs <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">*</span>(model<span class="sc">$</span>coefficients[[<span class="dv">1</span>]] <span class="sc">-</span> p)<span class="sc">*</span>q</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(cs)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>surplus_q <span class="ot">&lt;-</span> <span class="cf">function</span>(q, model){</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">demand</span>(q, model)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  cs <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">*</span>(model<span class="sc">$</span>coefficients[[<span class="dv">1</span>]] <span class="sc">-</span> p)<span class="sc">*</span>q</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(cs)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>cs_initial <span class="ot">&lt;-</span> <span class="fu">surplus_p</span>(<span class="dv">3</span>, d_agg)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>ps_initial <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">*</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">inverse_demand</span>(<span class="dv">3</span>, d_agg))</span></code></pre></div>
+<p>###FIX SCIENTIFIC NOTATION Consumer “benefit”: $3.525522^{6} Producer “benefit”: $8.8122364^{5}</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>env_costs <span class="ot">&lt;-</span> <span class="fu">inverse_demand</span>(<span class="dv">3</span>, d_agg)<span class="sc">*</span>scc_lb</span></code></pre></div>
+<p>Environmental cost: $1.4981^{4}</p>
 </div>
 
 
