@@ -34,11 +34,11 @@ ton <- 2000 # lb
 ```{r}
 emission_gal <- 19.6 # pounds of co2 in a gallon of gas
 
-mec <- emission_gal*(1/ton)*scc
+mec <- emission_gal*scc_lb
 
 ```
 
-The marginal external cost is $`r round(mec, 3)`/gal.
+The marginal external cost is $`r mec`/gal.
 
 
 ## Question 2
@@ -61,7 +61,7 @@ inverse_demand <- function(p, model){
 
 ```
 
-Aggregate demand: p = `r round(d_agg_slope, 2)`q + `r round(d_agg_intercept)`
+Aggregate demand: p = `r d_agg_slope`q + `r d_agg_intercept`
 
 ```{r supply curve}
 s_slope <- (3/inverse_demand(3,d_agg))
@@ -99,7 +99,7 @@ aggregate_demand
 
 ```
 
-Aggregate supply: p = `r round(s_slope, 2)`q + `r round(s_intercept)`
+Aggregate supply: p = `r s_slope`q
 
 ```{r surplus}
 
@@ -120,4 +120,14 @@ cs_initial <- surplus_p(3, d_agg)
 ps_initial <- 0.5*(3*inverse_demand(3, d_agg))
 
 ```
+
+###FIX SCIENTIFIC NOTATION
+Consumer "benefit": $`r cs_initial`
+Producer "benefit": $`r ps_initial`
+
+```{r env cost initial}
+env_costs <- inverse_demand(3, d_agg)*scc_lb
+```
+
+Environmental cost: $`r env_costs`
 
