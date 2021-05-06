@@ -31,7 +31,7 @@ ton <- 2000 # lb
 
 ## Question 1
 ```{r}
-emission_gal <- 19.6 # tons of co2 in a gallon of gas
+emission_gal <- 19.6 # pounds of co2 in a gallon of gas
 
 mec <- emission_gal*(1/ton)*scc
 
@@ -42,13 +42,35 @@ The marginal external cost is $`r round(mec, 3)`/gal.
 
 ## Question 2
 ```{r}
-d_ag <- lm(price_dollars ~ q_agg_gal, data = gas)
+d_ag <- lm(price_dollars ~ q_agg_gal, data = gas) #create linear model
 
-d_ag_slope <- d_ag$coefficients[[2]]
-d_ag_intercept <- d_ag$coefficients[[1]]
+d_ag_slope <- d_ag$coefficients[[2]] #finds the slope
+d_ag_intercept <- d_ag$coefficients[[1]] #finds the intercept
 
+```
 
+```{r}
+# Plotting demand and supply curves
 
+#DEMAND CURVE
+d_ag <- lm(price_dollars ~ q_agg_gal, data = gas) #create linear model
+
+d_ag_slope <- d_ag$coefficients[[2]] #finds the slope
+d_ag_intercept <- d_ag$coefficients[[1]] #finds the intercept
+
+price_fitted <- d_ag_intercept + d_ag_slope*gas$q_agg_gal #creates estimated line
+
+aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
+  geom_point() +
+  theme_minimal()+
+  labs(x = "Quantity of gas demanded (gal)",
+       y = "Price ($/gal)",
+       title = "Aggregate demand for gasoline using linear regression") +
+  geom_line(aes(y=price_fitted, x=q_agg_gal)) #plotted the fitted relationship on the graph
+
+aggregate_demand
+
+#SUPPLY CURVE
 
 ```
 
