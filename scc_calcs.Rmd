@@ -20,14 +20,15 @@ options(scipen=999)
 ```
 
 ## Data Setup
-```{r}
+```{r data info}
 gas <- read_csv(here("HW3_data.csv")) %>% 
   clean_names() %>% 
   mutate(q_agg_gal = q_low_gallons + q_high_gallons)
 
 gas_price <- 3 # $/gal
-scc <- 51 # $/metric ton
+scc_ton <- 51 # $/metric ton
 ton <- 2000 # lb
+scc_lb <- scc_ton/ton
 
 ```
 
@@ -150,4 +151,50 @@ High income consumer benefit: $`r cs_high_initial`
 
 Low income consumer benefit: $`r cs_low_initial`
 
+
+## Question 4
+
+```{r tax}
+
+tax <- mec # since mec curve is constant, optimal tax = mec
+
+```
+
+The optimal tax is $`r tax`.
+
+### (a) The amount of gasoline produced and consumed
+```{r}
+
+```
+
+
+### (b) The price of gasoline
+```{r}
+
+```
+
+### (c) Overall welfare of "high" income consumers
+```{r}
+
+```
+
+### (d) Overall welfare of "low" income consumers
+```{r}
+
+```
+
+### (e) Gas producers
+```{r}
+
+```
+
+### (f) Total environmental damage
+```{r}
+
+```
+
+### (g) Total tax revenue generated
+```{r}
+
+```
 
