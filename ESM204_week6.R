@@ -99,7 +99,7 @@ inverse_demand(0,model_demand)
 
 ##Consumer surplus function
 
-CS_p <- function(p, model){
+surplus_p <- function(p, model){
   q <- demand(p, model)
   cs <- 0.5*(model$coefficients[[1]] - p)*q
   return(cs)

@@ -315,7 +315,7 @@ summary {
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> (p <span class="sc">-</span> model<span class="sc">$</span>coefficients[[<span class="dv">1</span>]])<span class="sc">/</span>model<span class="sc">$</span>coefficients[[<span class="dv">2</span>]]</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(q)</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<p>Aggregate demand: p = -2.0429778^{-5}q + 15.0021358</p>
+<p>Aggregate demand: p = -0.0000204q + 15.0021358</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>s_slope <span class="ot">&lt;-</span> (<span class="dv">3</span>)<span class="sc">/</span>(<span class="fu">demand</span>(<span class="dv">3</span>, d_agg))</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>s_intercept <span class="ot">&lt;-</span> <span class="dv">0</span></span></code></pre></div>
@@ -352,9 +352,9 @@ summary {
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>cs_initial <span class="ot">&lt;-</span> <span class="fu">surplus_p</span>(<span class="dv">3</span>, d_agg)</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>ps_initial <span class="ot">&lt;-</span> <span class="fl">0.5</span><span class="sc">*</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">inverse_demand</span>(<span class="dv">3</span>, d_agg))</span></code></pre></div>
-<p>###FIX SCIENTIFIC NOTATION Consumer “benefit”: $3.525522^{6} Producer “benefit”: $8.8122364^{5}</p>
+<p>###FIX SCIENTIFIC NOTATION Consumer “benefit”: $3525521.95 Producer “benefit”: $881223.64</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>env_costs <span class="ot">&lt;-</span> <span class="fu">inverse_demand</span>(<span class="dv">3</span>, d_agg)<span class="sc">*</span>scc_lb</span></code></pre></div>
-<p>Environmental cost: $1.4981^{4}</p>
+<p>Environmental cost: $14981</p>
 </div>
 
 
