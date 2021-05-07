@@ -89,20 +89,20 @@ price_fitted_demand <- d_ag_intercept + d_ag_slope*gas$q_agg_gal #creates estima
 
 price_fitted_supply <- s_intercept + s_slope*gas$q_agg_gal #creates estimated line for supply
 
-aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
-  geom_point() +
-  theme_minimal()+
-  labs(x = "Quantity of gas demanded (gal)",
-       y = "Price ($/gal)",
-       title = "Aggregate demand for gasoline using linear regression") +
-  geom_line(aes(y=price_fitted_demand, x=random_x$random)) +
-  geom_line(aes(y=price_fitted_supply, x=random_x$random)) #plotted the fitted relationship on the graph
+#aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
+  #geom_point() +
+  #theme_minimal()+
+  #labs(x = "Quantity of gas demanded (gal)",
+      # y = "Price ($/gal)",
+      # title = "Aggregate demand for gasoline using linear regression") +
+  #geom_line(aes(y=price_fitted_demand, x=random_x$random)) +
+ # geom_line(aes(y=price_fitted_supply, x=random_x$random)) #plotted the fitted relationship on the graph
 
-aggregate_demand
+#aggregate_demand
 
 ```
 
-Aggregate supply: p = `r s_slope`q
+Supply: p = `r s_slope`q
 
 ```{r surplus}
 
@@ -124,11 +124,12 @@ ps_initial <- 0.5*(3*inverse_demand(3, d_agg))
 
 ```
 
-Consumer "benefit": $`r cs_initial`
-Producer "benefit": $`r ps_initial`
+Consumer benefit: $`r cs_initial`
+
+Producer benefit: $`r ps_initial`
 
 ```{r env cost initial}
-env_costs <- inverse_demand(3, d_agg)*scc_lb
+env_costs <- inverse_demand(3, d_agg)*mec
 ```
 
 Environmental cost: $`r env_costs`
@@ -138,8 +139,8 @@ Environmental cost: $`r env_costs`
 
 ```{r demands}
 
-d_low <- lm(price_dollars ~ q_low_gallons, data = gas) #create linear model for low
-d_high <- lm(price_dollars ~ q_high_gallons, data = gas) #create linear model for high
+d_low <- lm(price_dollars ~ q_low_gallons, data = gas) # create linear model for low
+d_high <- lm(price_dollars ~ q_high_gallons, data = gas) # create linear model for high
 
 cs_low_initial <- surplus_p(3, d_low)
 
@@ -162,39 +163,41 @@ tax <- mec # since mec curve is constant, optimal tax = mec
 
 The optimal tax is $`r tax`.
 
-### (a) The amount of gasoline produced and consumed
+(a) The amount of gasoline produced and consumed: 568719.051 gal
+(b) The price of gasoline: $3.40
+
+(c) Overall welfare of "high" income consumers: 
 ```{r}
+cs_high_tax <- surplus_p(3.4, d_high)
+
+high_loss_tax <- cs_high_initial-cs_high_tax
 
 ```
+$`r high_loss_tax`
 
 
-### (b) The price of gasoline
+(d) Overall welfare of "low" income consumers:
 ```{r}
+env_cost_tax <- mec*568719.051
+
+cs_low_tax <- surplus_p(3.4, d_low)-env_cost_tax
+
+low_loss_tax <- cs_low_initial-cs_low_tax
 
 ```
+$`r cs_low_tax`
 
-### (c) Overall welfare of "high" income consumers
+
+(e) Gas producers:
 ```{r}
 
-```
-
-### (d) Overall welfare of "low" income consumers
-```{r}
+ps_tax <- 0.5*(3.4-tax)*568719.051
+ps_loss_tax <- ps_initial-ps_tax
 
 ```
+Net loss: $`r ps_loss_tax`
 
-### (e) Gas producers
-```{r}
+(f) Total environmental damage: $`r round(env_cost_tax, 2)`
+(g) Total tax revenue generated: $`r round(env_cost_tax, 2)`
 
-```
-
-### (f) Total environmental damage
-```{r}
-
-```
-
-### (g) Total tax revenue generated
-```{r}
-
-```
 
