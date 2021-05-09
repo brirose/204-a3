@@ -52,12 +52,12 @@ d_agg <- lm(price_dollars ~ q_agg_gal, data = gas) #create linear model
 d_agg_slope <- d_agg$coefficients[[2]] #finds the slope
 d_agg_intercept <- d_agg$coefficients[[1]] #finds the intercept
 
-demand <- function(q, model){
+demand_q <- function(q, model){
   p <- model$coefficients[[1]] + model$coefficients[[2]]*q
 return(p)
 }
 
-inverse_demand <- function(p, model){
+demand_p <- function(p, model){
   q <- (p - model$coefficients[[1]])/model$coefficients[[2]]
   return(q)
 }
@@ -67,7 +67,7 @@ inverse_demand <- function(p, model){
 Aggregate demand: p = `r d_agg_slope`q + `r d_agg_intercept`
 
 ```{r supply curve}
-s_slope <- (3/inverse_demand(3,d_agg))
+s_slope <- (3/demand_p(3,d_agg))
 
 s_intercept <- 0
 ```
@@ -79,13 +79,7 @@ random_x <- data_frame("random" = 0:900000)
 ```{r}
 # Plotting demand and supply curves
 
-#DEMAND CURVE
-d_ag <- lm(price_dollars ~ q_agg_gal, data = gas) #create linear model
-
-d_ag_slope <- d_ag$coefficients[[2]] #finds the slope
-d_ag_intercept <- d_ag$coefficients[[1]] #finds the intercept
-
-price_fitted_demand <- d_ag_intercept + d_ag_slope*gas$q_agg_gal #creates estimated line for demand
+price_fitted_demand <- d_agg_intercept + d_agg_slope*gas$q_agg_gal #creates estimated line for demand
 
 price_fitted_supply <- s_intercept + s_slope*gas$q_agg_gal #creates estimated line for supply
 
@@ -107,20 +101,20 @@ Supply: p = `r s_slope`q
 ```{r surplus}
 
 surplus_p <- function(p, model){
-  q <- inverse_demand(p, model)
+  q <- demand_p(p, model)
   cs <- 0.5*(model$coefficients[[1]] - p)*q
   return(cs)
 }
 
 surplus_q <- function(q, model){
-  p <- demand(q, model)
+  p <- demand_q(q, model)
   cs <- 0.5*(model$coefficients[[1]] - p)*q
   return(cs)
 }
 
 cs_initial <- surplus_p(3, d_agg)
 
-ps_initial <- 0.5*(3*inverse_demand(3, d_agg))
+ps_initial <- 0.5*(3*demand_p(3, d_agg))
 
 ```
 
@@ -129,7 +123,7 @@ Consumer benefit: $`r cs_initial`
 Producer benefit: $`r ps_initial`
 
 ```{r env cost initial}
-env_costs <- inverse_demand(3, d_agg)*mec
+env_costs <- demand_p(3, d_agg)*mec
 ```
 
 Environmental cost: $`r env_costs`
@@ -163,12 +157,35 @@ tax <- mec # since mec curve is constant, optimal tax = mec
 
 The optimal tax is $`r tax`.
 
-(a) The amount of gasoline produced and consumed: 568719.051 gal
-(b) The price of gasoline: $3.40
+(a) The amount of gasoline produced and consumed:
+```{r q_tax}
+equi_q <- function(q){
+   d_agg_slope * q - s_slope * q + d_agg_intercept - mec
+}
+
+q_range <- c(0, 800000)
+
+q_tax <- uniroot(equi_q, q_range)
+
+q_tax <- q_tax$root
+
+```
+
+`r q_tax` gallons
+
+(b) The price of gasoline:
+```{r p_tax}
+
+p_tax <- demand_q(q_tax, d_agg)
+
+```
+
+$`r round(p_tax, 2)`
+
 
 (c) Overall welfare of "high" income consumers: 
 ```{r}
-cs_high_tax <- surplus_p(3.4, d_high)
+cs_high_tax <- surplus_p(p_tax, d_high)
 
 high_loss_tax <- cs_high_initial-cs_high_tax
 
@@ -178,9 +195,9 @@ $`r high_loss_tax`
 
 (d) Overall welfare of "low" income consumers:
 ```{r}
-env_cost_tax <- mec*568719.051
+env_cost_tax <- mec*q_tax
 
-cs_low_tax <- surplus_p(3.4, d_low)-env_cost_tax
+cs_low_tax <- surplus_p(p_tax, d_low)-env_cost_tax
 
 low_loss_tax <- cs_low_initial-cs_low_tax
 
@@ -191,7 +208,7 @@ $`r cs_low_tax`
 (e) Gas producers:
 ```{r}
 
-ps_tax <- 0.5*(3.4-tax)*568719.051
+ps_tax <- 0.5*(p_tax-tax)*q_tax
 ps_loss_tax <- ps_initial-ps_tax
 
 ```
@@ -200,4 +217,44 @@ Net loss: $`r ps_loss_tax`
 (f) Total environmental damage: $`r round(env_cost_tax, 2)`
 (g) Total tax revenue generated: $`r round(env_cost_tax, 2)`
 
+
+
+## Question 5
+
+```{r}
+range_benefits <- tribble(~scc, ~mec, ~cb_high, ~cb_low, ~ps)
+scc_range <- c(51, 75, 100, 125, 150)
+
+high_per <- demand_p(3, d_high)/demand_p(3, d_agg)
+low_per <- demand_p(3, d_low)/demand_p(3, d_agg)
+
+
+for (n in scc_range){
+  scc <- n
+  mec <- 19.6*scc/2000
+  tax <- mec
+  
+  q_range <- c(0, 800000)
+  
+  q_tax <- uniroot(equi_q, q_range)
+  
+  q_tax <- q_tax$root
+  
+  p_tax <- demand_q(q_tax, d_agg)
+  
+  tax_rev <- tax * q_tax
+  
+  cb_high <- surplus_q(q_tax, d_high) + high_per * tax_rev
+  
+  cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev
+  
+  ps <- ps_tax <- 0.5*(p_tax-tax)*q_tax
+  
+  sltn <- c(scc, mec, cb_high, cb_low, ps)
+  
+  range_benefits <- rbind(range_benefits, sltn) # need to figure this out???? why does it overwrite the names?
+}
+  
+
+```
 
