@@ -29,7 +29,7 @@ gas <- read_csv(here("HW3_data.csv")) %>%
 gas_price <- 3 # $/gal
 scc_ton <- 51 # $/metric ton
 ton <- 2000 # lb
-scc_lb <- scc_ton/ton
+scc_lb <- scc_ton/ton # find scc per lb
 
 ```
 
@@ -38,7 +38,7 @@ scc_lb <- scc_ton/ton
 ```{r}
 emission_gal <- 19.6 # pounds of co2 in a gallon of gas
 
-mec <- emission_gal*scc_lb
+mec <- emission_gal*scc_lb # mec as product of emissions and scc
 
 ```
 
@@ -48,10 +48,14 @@ The marginal external cost is $`r mec`/gal.
 ## Question 2
 
 ```{r demand curve}
-d_agg <- lm(price_dollars ~ q_agg_gal, data = gas) #create linear model
+d_agg <- lm(price_dollars ~ q_agg_gal, data = gas) # linear model of aggregate
 
-d_agg_slope <- d_agg$coefficients[[2]] #finds the slope
-d_agg_intercept <- d_agg$coefficients[[1]] #finds the intercept
+d_agg_slope <- d_agg$coefficients[[2]] # aggregate slope
+d_agg_intercept <- d_agg$coefficients[[1]] # aggregate intercept
+
+
+
+# demand calculation functions take p or q input and use model outputs 
 
 demand_q <- function(q, model){
   p <- model$coefficients[[1]] + model$coefficients[[2]]*q
@@ -65,12 +69,12 @@ demand_p <- function(p, model){
 
 ```
 
-Aggregate demand: p = `r d_agg_slope`q + `r d_agg_intercept`
+Aggregate demand: P = `r d_agg_slope`Q + `r d_agg_intercept`
 
 ```{r supply curve}
-s_slope <- (3/demand_p(3,d_agg))
 
-s_intercept <- 0
+s_slope <- (gas_price/demand_p(gas_price, d_agg)) # calculate slope of mpc
+
 ```
 
 ```{r}
@@ -82,7 +86,7 @@ random_x <- data_frame("random" = 0:900000)
 
 price_fitted_demand <- d_agg_intercept + d_agg_slope*gas$q_agg_gal #creates estimated line for demand
 
-price_fitted_supply <- s_intercept + s_slope*gas$q_agg_gal #creates estimated line for supply
+price_fitted_supply <- s_slope*gas$q_agg_gal #creates estimated line for supply
 
 #aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
   #geom_point() +
@@ -97,9 +101,11 @@ price_fitted_supply <- s_intercept + s_slope*gas$q_agg_gal #creates estimated li
 
 ```
 
-Supply: p = `r s_slope`q
+MPC: P = `r s_slope`Q
 
 ```{r surplus}
+
+# surplus calculations take p or q input and find area based on model inputs
 
 surplus_p <- function(p, model){
   q <- demand_p(p, model)
@@ -113,9 +119,12 @@ surplus_q <- function(q, model){
   return(cs)
 }
 
-cs_initial <- surplus_p(3, d_agg)
 
-ps_initial <- 0.5*(3*demand_p(3, d_agg))
+# use function
+
+cs_initial <- surplus_p(gas_price, d_agg) # aggregate CS
+
+ps_initial <- 0.5*(gas_price*demand_p(gas_price, d_agg)) # PS
 
 ```
 
@@ -124,7 +133,9 @@ Consumer benefit: $`r round(cs_initial, 2)`
 Producer benefit: $`r round(ps_initial, 2)`
 
 ```{r env cost initial}
-env_costs <- demand_p(3, d_agg)*mec
+
+env_costs <- demand_p(gas_price, d_agg)*mec # cost as product of Q and MEC
+
 ```
 
 Environmental cost: $`r round(env_costs, 2)`
@@ -137,9 +148,9 @@ Environmental cost: $`r round(env_costs, 2)`
 d_low <- lm(price_dollars ~ q_low_gallons, data = gas) # create linear model for low
 d_high <- lm(price_dollars ~ q_high_gallons, data = gas) # create linear model for high
 
-cs_low_initial <- surplus_p(3, d_low)
+cs_low_initial <- surplus_p(gas_price, d_low) # CS of low at P = $3
 
-cs_high_initial <- surplus_p(3, d_high)
+cs_high_initial <- surplus_p(gas_price, d_high) # CS of low at P = $3
 
 ```
 
@@ -160,15 +171,18 @@ The optimal tax is $`r round(tax, 2)`.
 
 ### a. The amount of gasoline produced and consumed:
 ```{r q_tax}
+
+# function that represents q when MSC = Aggregate demand
 equi_q <- function(q){
    d_agg_slope * q - s_slope * q + d_agg_intercept - mec
 }
 
 q_range <- c(0, 800000)
 
+# solve function
 q_tax <- uniroot(equi_q, q_range)
 
-q_tax <- q_tax$root
+q_tax <- q_tax$root # pull Q when MSC = Aggregate demand
 
 ```
 
@@ -177,7 +191,7 @@ q_tax <- q_tax$root
 ### b. The price of gasoline:
 ```{r p_tax}
 
-p_tax <- demand_q(q_tax, d_agg)
+p_tax <- demand_q(q_tax, d_agg) # calculate P when MSC = Aggregate demand
 
 ```
 
@@ -185,22 +199,26 @@ The price of gasoline changes from $`r gas_price` to $`r round(p_tax, 2)`.
 
 
 ### c. Overall welfare of "high" income consumers: 
-```{r}
-cs_high_tax <- surplus_p(p_tax, d_high)
+```{r welfare delta high}
 
-high_loss_tax <- cs_high_initial-cs_high_tax
+cs_high_tax <- surplus_p(p_tax, d_high) # cs at taxed equilibrium
+
+high_loss_tax <- cs_high_initial-cs_high_tax # delta
 
 ```
+
 New high consumer welfare is $`r round(cs_high_tax, 2)` with a net loss of $`r round(high_loss_tax, 2)`.
 
 
 ### d. Overall welfare of "low" income consumers:
-```{r}
-env_cost_tax <- mec*q_tax
+```{r welfare delta low}
 
+env_cost_tax <- mec * q_tax # env burden when taxed
+
+# cs at taxed equilibrium when bear burden env cost
 cs_low_tax <- surplus_p(p_tax, d_low)-env_cost_tax
 
-low_loss_tax <- cs_low_initial-cs_low_tax
+low_loss_tax <- cs_low_initial-cs_low_tax # delta
 
 ```
 New low consumer welfare is $`r round(cs_low_tax, 2)` with a net loss of $`r round(low_loss_tax, 2)`.
@@ -209,8 +227,8 @@ New low consumer welfare is $`r round(cs_low_tax, 2)` with a net loss of $`r rou
 ### e. Gas producers:
 ```{r}
 
-ps_tax <- 0.5*(p_tax-tax)*q_tax
-ps_loss_tax <- ps_initial-ps_tax
+ps_tax <- 0.5*(p_tax-tax)*q_tax # ps at taxed equilibrium
+ps_loss_tax <- ps_initial-ps_tax # delta
 
 ```
 New producer surplus is `r round(ps_tax, 2)` with a net loss of $`r round(ps_loss_tax, 2)`
@@ -226,51 +244,53 @@ $`r round(env_cost_tax, 2)`
 
 ## Question 5
 
-```{r}
-range_benefits <- tribble(~scc, ~mec, ~cb_high, ~cb_low, ~ps,)
-                          
-scc_range <- c(51, 75, 100, 125, 150)
+```{r range scc}
 
-high_per <- demand_p(3, d_high)/demand_p(3, d_agg)
-low_per <- demand_p(3, d_low)/demand_p(3, d_agg)
+range_benefits <- tribble(~scc, ~mec, ~cb_high, ~cb_low, ~ps) # initialize dataframe
+                          
+scc_range <- c(51, 75, 100, 125, 150) # range of values of interest
+
+high_per <- demand_p(3, d_high)/demand_p(3, d_agg) # percent of tax rev to high
+low_per <- demand_p(3, d_low)/demand_p(3, d_agg) # percent of tax rev to low
 
 
 for (n in scc_range){
-  scc <- n
-  mec <- 19.6*scc/2000
-  tax <- mec
+  scc <- n # set scc as index in list
+  mec_1 <- 19.6*scc/2000 # find mec at given scc
+  tax <- mec_1 # find tax per unit
+ 
+  q_tax <- uniroot(equi_q, q_range) # solve for Q at this scc
   
-  q_range <- c(0, 800000)
+  q_tax <- q_tax$root # pull Q
   
-  q_tax <- uniroot(equi_q, q_range)
+  p_tax <- demand_q(q_tax, d_agg) # solve for P at this scc
   
-  q_tax <- q_tax$root
+  tax_rev <- tax * q_tax # find tax rev at this SCC
   
-  p_tax <- demand_q(q_tax, d_agg)
+  cb_high <- surplus_q(q_tax, d_high) + high_per * tax_rev # calculate CB as CS + redistributed tax
   
-  tax_rev <- tax * q_tax
+  cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev # calculate CB as CS + redistributed tax
   
-  cb_high <- surplus_q(q_tax, d_high) + high_per * tax_rev
+  ps <- ps_tax <- 0.5*(p_tax-tax)*q_tax # calculate PS
   
-  cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev
+  sltn <- c(scc, mec_1, cb_high, cb_low, ps) # make vector of solutions
   
-  ps <- ps_tax <- 0.5*(p_tax-tax)*q_tax
-  
-  sltn <- c(scc, mec, cb_high, cb_low, ps)
-  
-  range_benefits <- rbind(range_benefits, sltn)
+  range_benefits <- rbind(range_benefits, sltn) # add to df
 }
   
+# lol rename bc i forgot the right way to bind to a tibble
+
 range_benefits_table <- range_benefits %>% 
   rename(
     "Social Cost of Carbon" = "X51",
-    "Marginal External Cost ($/gal)" = "X0.4998",
-    "Total High Consumer Benefit ($)" = "X4630436.03078725",
-    "Total Low Consumer Benefit ($)" = "X10725144.9471771",
-    "Gas Producer Benefit ($)" = "X823485.334886087"
+    "Marginal External Cost" = "X0.4998",
+    "Total High Consumer Benefit" = "X4630436.03078725",
+    "Total Low Consumer Benefit" = "X10725144.9471771",
+    "Gas Producer Benefit" = "X823485.334886087"
   )
-
-range_benefits_table
+range_benefits_table %>% 
+  kbl(caption ="Table 1. Costs and Benefits in dollars of various CSS") %>% 
+  kable_paper("hover", full_width = T)
 
 ```
 
@@ -278,5 +298,46 @@ range_benefits_table
 ## Question 6
 
 
+### a. Total gas consumption
+```{r electric}
+gas <- gas %>% 
+  mutate(
+    electric_high = q_high_gallons/2, # electric reduces high consumer demand by half
+    electric_agg = electric_high + q_low_gallons # new aggregate
+  )
+
+d_elec <- lm(price_dollars ~ electric_agg, data = gas) # linear model of aggregate
+
+d_elec_slope <- d_elec$coefficients[[2]] # pull slope
+d_elec_intercept <- d_elec$coefficients[[1]] # pull intercept
+
+
+# function to find q when MSC = Aggregate demand
+equi_ele_q <- function(q){
+   d_elec_slope * q - s_slope * q + d_elec_intercept - mec
+}
+
+# Solve
+q_ele <- uniroot(equi_ele_q, q_range)
+
+q_ele <- q_ele$root # pull Q
+```
+`r q_ele`
+
+
+### b. Total environmental externality
+```{r env cost ele}
+
+env_cost_ele <- mec * q_ele # environmental cost when electric
+
+```
+$`r round(env_cost_ele, 2)`
+
+
+### c. Tax for same damage
+```{r}
+analagous_tax <- demand_q(q_ele, d_agg) - gas_price # tax for same env cost
+```
+$`r round(analagous_tax, 2)`
 
 
