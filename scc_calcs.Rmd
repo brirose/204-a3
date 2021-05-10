@@ -34,17 +34,13 @@ scc_lb <- scc_ton/ton # find scc per lb
 
 ```
 
-
 ## Question 1
 ```{r}
 emission_gal <- 19.6 # pounds of co2 in a gallon of gas
 
 mec <- emission_gal*scc_lb # mec as product of emissions and scc
-
 ```
-
 The marginal external cost is $`r mec`/gal.
-
 
 ## Question 2
 
@@ -53,8 +49,6 @@ d_agg <- lm(price_dollars ~ q_agg_gal, data = gas) # linear model of aggregate
 
 d_agg_slope <- d_agg$coefficients[[2]] # aggregate slope
 d_agg_intercept <- d_agg$coefficients[[1]] # aggregate intercept
-
-
 
 # demand calculation functions take p or q input and use model outputs 
 
@@ -70,35 +64,19 @@ demand_p <- function(p, model){
 
 ```
 
-Aggregate demand: P = `r d_agg_slope`Q + `r d_agg_intercept`
+* The aggregate daily demand for gasoline is P = `r d_agg_slope`Q + `r d_agg_intercept`
 
 ```{r supply curve}
 
 s_slope <- (gas_price/demand_p(gas_price, d_agg)) # calculate slope of mpc
 
-```
-
-```{r}
-# Plotting demand and supply curves
-
 price_fitted_demand <- d_agg_intercept + d_agg_slope*gas$q_agg_gal #creates estimated line for demand
 
 price_fitted_supply <- s_slope*gas$q_agg_gal #creates estimated line for supply
 
-#aggregate_demand <- ggplot(data=gas, aes(x=q_agg_gal,y=price_dollars))+
-  #geom_point() +
-  #theme_minimal()+
-  #labs(x = "Quantity of gas demanded (gal)",
-      # y = "Price ($/gal)",
-      # title = "Aggregate demand for gasoline using linear regression") +
-  #geom_line(aes(y=price_fitted_demand, x=random_x$random)) +
- # geom_line(aes(y=price_fitted_supply, x=random_x$random)) #plotted the fitted relationship on the graph
-
-#aggregate_demand
-
 ```
 
-MPC: P = `r s_slope`Q
+* The supply curve for gasoline is P = `r s_slope`Q
 
 ```{r surplus}
 
@@ -116,26 +94,21 @@ surplus_q <- function(q, model){
   return(cs)
 }
 
-
 # use function
 
 cs_initial <- surplus_p(gas_price, d_agg) # aggregate CS
 
 ps_initial <- 0.5*(gas_price*demand_p(gas_price, d_agg)) # PS
 
-```
-
-Consumer benefit: $`r round(cs_initial, 2)`
-
-Producer benefit: $`r round(ps_initial, 2)`
-
-```{r env cost initial}
-
 env_costs <- demand_p(gas_price, d_agg)*mec # cost as product of Q and MEC
 
 ```
 
-Environmental cost: $`r round(env_costs, 2)`
+* Status quo consumer benefit is $`r round(cs_initial, 2)`
+
+* Status quo producer benefit is $`r round(ps_initial, 2)`
+
+* Status quo environmental cost is $`r round(env_costs, 2)`
 
 
 ## Question 3
@@ -151,9 +124,9 @@ cs_high_initial <- surplus_p(gas_price, d_high) # CS of low at P = $3
 
 ```
 
-High income consumer benefit: $`r round(cs_high_initial, 2)`
+* High income consumer benefit: $`r round(cs_high_initial, 2)`
 
-Low income consumer benefit: $`r round(cs_low_initial, 2)`
+* Low income consumer benefit: $`r round(cs_low_initial, 2)`
 
 
 ## Question 4
@@ -183,7 +156,7 @@ q_tax <- q_tax$root # pull Q when MSC = Aggregate demand
 
 ```
 
-`r q_tax` gallons
+The amount of gasoline produced and consumed is `r q_tax` gallons
 
 ### b. The price of gasoline:
 ```{r p_tax}
@@ -192,8 +165,7 @@ p_tax <- demand_q(q_tax, d_agg) # calculate P when MSC = Aggregate demand
 
 ```
 
-The price of gasoline changes from $`r gas_price` to $`r round(p_tax, 2)`.
-
+The price of gasoline changes from $`r gas_price` to $`r round(p_tax, 2)` after the tax.
 
 ### c. Overall welfare of "high" income consumers: 
 ```{r welfare delta high}
@@ -204,8 +176,7 @@ high_loss_tax <- cs_high_initial-cs_high_tax # delta
 
 ```
 
-New high consumer welfare is $`r round(cs_high_tax, 2)` with a net loss of $`r round(high_loss_tax, 2)`.
-
+New high-income consumer welfare is $`r round(cs_high_tax, 2)` with a net loss of $`r round(high_loss_tax, 2)`.
 
 ### d. Overall welfare of "low" income consumers:
 ```{r welfare delta low}
@@ -218,8 +189,7 @@ cs_low_tax <- surplus_p(p_tax, d_low)-env_cost_tax
 low_loss_tax <- cs_low_initial-cs_low_tax # delta
 
 ```
-New low consumer welfare is $`r round(cs_low_tax, 2)` with a net loss of $`r round(low_loss_tax, 2)`.
-
+New low-income consumer welfare is $`r round(cs_low_tax, 2)` with a net loss of $`r round(low_loss_tax, 2)`.
 
 ### e. Gas producers:
 ```{r}
@@ -230,13 +200,13 @@ ps_loss_tax <- ps_initial-ps_tax # delta
 ```
 New producer surplus is `r round(ps_tax, 2)` with a net loss of $`r round(ps_loss_tax, 2)`
 
+### f. Total environmental damage:
 
-### f. Total environmental damage: 
-$`r round(env_cost_tax, 2)`
+The total environmental damage is $`r round(env_cost_tax, 2)`.
 
 ### g. Total tax revenue generated: 
-$`r round(env_cost_tax, 2)`
 
+The total tax revenue generated is $`r round(env_cost_tax, 2)`.
 
 
 ## Question 5
@@ -275,8 +245,6 @@ for (n in scc_range){
   range_benefits <- rbind(range_benefits, sltn) # add to df
 }
   
-# lol rename bc i forgot the right way to bind to a tibble
-
 range_benefits_table <- range_benefits %>% 
   rename(
     "Social Cost of Carbon" = "X51",
@@ -292,15 +260,7 @@ range_benefits_table %>%
 ```
 
 
-```{r}
-cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev
-cb_low1 <- surplus_q(q_tax, d_low)
-```
-
-
-
 ## Question 6
-
 
 ### a. Total gas consumption
 ```{r electric}
@@ -328,7 +288,7 @@ q_ele <- uniroot(equi_ele_q, q_range)
 
 q_ele <- q_ele$root # pull Q
 ```
-`r q_ele`
+The new demand for gasoline after the invention of electric vehicles is `r q_ele` gallons.
 
 
 ### b. Total environmental externality
@@ -337,13 +297,13 @@ q_ele <- q_ele$root # pull Q
 env_cost_ele <- mec * q_ele # environmental cost when electric
 
 ```
-$`r round(env_cost_ele, 2)`
+The total cost of the environmental externality is $`r round(env_cost_ele, 2)`.
 
 
 ### c. Tax for same damage
 ```{r}
 analagous_tax <- demand_q(q_ele, d_agg) - gas_price # tax for same env cost
 ```
-$`r round(analagous_tax, 2)`
+There would need to be a gasoline tax of $`r round(analagous_tax, 2)` to reduce the total environmental damage to the same as the electric car technology. 
 
 
