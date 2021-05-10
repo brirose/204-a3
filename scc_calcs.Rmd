@@ -4,6 +4,7 @@ author: "Bri Baker and Anna Talken"
 date: "Spring 2021"
 output:
   html_document:
+    code_folding: hide
     theme: cosmo
     highlight: kate
 ---
@@ -75,10 +76,6 @@ Aggregate demand: P = `r d_agg_slope`Q + `r d_agg_intercept`
 
 s_slope <- (gas_price/demand_p(gas_price, d_agg)) # calculate slope of mpc
 
-```
-
-```{r}
-random_x <- data_frame("random" = 0:900000)
 ```
 
 ```{r}
@@ -256,8 +253,8 @@ low_per <- demand_p(3, d_low)/demand_p(3, d_agg) # percent of tax rev to low
 
 for (n in scc_range){
   scc <- n # set scc as index in list
-  mec_1 <- 19.6*scc/2000 # find mec at given scc
-  tax <- mec_1 # find tax per unit
+  mec <- 19.6*scc/2000 # find mec at given scc
+  tax <- mec # find tax per unit
  
   q_tax <- uniroot(equi_q, q_range) # solve for Q at this scc
   
@@ -271,9 +268,9 @@ for (n in scc_range){
   
   cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev # calculate CB as CS + redistributed tax
   
-  ps <- ps_tax <- 0.5*(p_tax-tax)*q_tax # calculate PS
+  ps <- 0.5*(p_tax-tax)*q_tax # calculate PS
   
-  sltn <- c(scc, mec_1, cb_high, cb_low, ps) # make vector of solutions
+  sltn <- c(scc, mec, cb_high, cb_low, ps) # make vector of solutions
   
   range_benefits <- rbind(range_benefits, sltn) # add to df
 }
