@@ -247,8 +247,8 @@ range_benefits <- tribble(~scc, ~mec, ~cb_high, ~cb_low, ~ps) # initialize dataf
                           
 scc_range <- c(51, 75, 100, 125, 150) # range of values of interest
 
-high_per <- demand_p(3, d_high)/demand_p(3, d_agg) # percent of tax rev to high
-low_per <- demand_p(3, d_low)/demand_p(3, d_agg) # percent of tax rev to low
+high_per <- demand_p(gas_price, d_high)/demand_p(gas_price, d_agg) # percent of tax rev to high
+low_per <- demand_p(gas_price, d_low)/demand_p(gas_price, d_agg) # percent of tax rev to low
 
 
 for (n in scc_range){
@@ -256,17 +256,17 @@ for (n in scc_range){
   mec <- 19.6*scc/2000 # find mec at given scc
   tax <- mec # find tax per unit
  
-  q_tax <- uniroot(equi_q, q_range) # solve for Q at this scc
+  q_tax <- uniroot(equi_q, q_range) # solve for Agg Q 
   
-  q_tax <- q_tax$root # pull Q
+  q_tax <- q_tax$root # pull Agg Q
   
   p_tax <- demand_q(q_tax, d_agg) # solve for P at this scc
   
   tax_rev <- tax * q_tax # find tax rev at this SCC
   
-  cb_high <- surplus_q(q_tax, d_high) + high_per * tax_rev # calculate CB as CS + redistributed tax
+  cb_high <- surplus_p(p_tax, d_high) + high_per * tax_rev # calculate CB as CS + redistributed tax
   
-  cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev # calculate CB as CS + redistributed tax
+  cb_low <- surplus_p(p_tax, d_low) + low_per * tax_rev # calculate CB as CS + redistributed tax
   
   ps <- 0.5*(p_tax-tax)*q_tax # calculate PS
   
@@ -281,8 +281,8 @@ range_benefits_table <- range_benefits %>%
   rename(
     "Social Cost of Carbon" = "X51",
     "Marginal External Cost" = "X0.4998",
-    "Total High Consumer Benefit" = "X4630436.03078725",
-    "Total Low Consumer Benefit" = "X10725144.9471771",
+    "Total High Consumer Benefit" = "X3043300.00912457",
+    "Total Low Consumer Benefit" = "X582660.147598292",
     "Gas Producer Benefit" = "X823485.334886087"
   )
 range_benefits_table %>% 
@@ -292,11 +292,20 @@ range_benefits_table %>%
 ```
 
 
+```{r}
+cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev
+cb_low1 <- surplus_q(q_tax, d_low)
+```
+
+
+
 ## Question 6
 
 
 ### a. Total gas consumption
 ```{r electric}
+mec <- emission_gal*scc_lb
+
 gas <- gas %>% 
   mutate(
     electric_high = q_high_gallons/2, # electric reduces high consumer demand by half
