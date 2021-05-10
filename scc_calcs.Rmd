@@ -292,13 +292,6 @@ range_benefits_table %>%
 ```
 
 
-```{r}
-cb_low <- surplus_q(q_tax, d_low) + low_per * tax_rev
-cb_low1 <- surplus_q(q_tax, d_low)
-```
-
-
-
 ## Question 6
 
 
